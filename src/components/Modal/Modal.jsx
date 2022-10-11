@@ -1,6 +1,11 @@
 import React, { useState } from 'react'
+import Mensaje from '../Mensaje/Mensaje'
 import CerrarBtn from '../../img/cerrar.svg'
-const Modal = ({ setModal, animarModal, setAnimarModal }) => {
+
+
+const Modal = ({ setModal, animarModal, setAnimarModal, guardarGasto }) => {
+
+    const [mensaje, setMensaje] = useState('')
 
     const [nombre, setNombre] = useState('');
     const [cantidad, setCantidad] = useState('')
@@ -8,10 +13,24 @@ const Modal = ({ setModal, animarModal, setAnimarModal }) => {
 
     const ocultarModal = () => {
         setAnimarModal(false)
-
         setTimeout(() => {
             setModal(false)
         }, 1000)
+    }
+
+    const handleSubmint = (e) =>{
+        e.preventDefault();
+
+        if ([nombre, cantidad, categoria].includes('')) {
+            setMensaje('Todos los campos son obligatorios')
+
+            setTimeout(()=>{
+                setMensaje('')
+            },2000)
+            return;
+        }
+
+        guardarGasto({nombre,cantidad,categoria})
     }
 
     return (
@@ -24,8 +43,10 @@ const Modal = ({ setModal, animarModal, setAnimarModal }) => {
                 />
             </div>
 
-            <form className={`formulario ${animarModal ? "animar" : "cerrar"}`}>
+            <form onSubmit={handleSubmint} className={`formulario ${animarModal ? "animar" : "cerrar"}`}>
                 <legend>Nuevo gasto</legend>
+
+                {mensaje && <Mensaje tipo="error">{mensaje}</Mensaje>}
 
                 <div className='campo'>
                     <label htmlFor="nombre">Nombre</label>
@@ -62,11 +83,11 @@ const Modal = ({ setModal, animarModal, setAnimarModal }) => {
                         <option value="">-- Seleccione</option>
                         <option value="Ahorro">Ahorro</option>
                         <option value="Comida">Comida</option>
-                        <option value="Gastos Varios">Gastos Varios</option>
+                        <option value="Gastos">Gastos Varios</option>
                         <option value="Casa">Casa</option>
                         <option value="Ocio">Ocio</option>
                         <option value="Salud">Salud</option>
-                        <option value="Subscipciones">Subscipciones</option>
+                        <option value="Suscripciones">Suscripciones</option>
                     </select>
                 </div>
 
