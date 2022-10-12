@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Header from './components/Header/Header'
 import IconoNuevoGasto from './img/nuevo-gasto.svg'
 import ListadoGastos from './components/ListadoGastos/ListadoGastos';
@@ -15,8 +15,21 @@ function App() {
 
   const [gastos, setGastos] = useState([]);
 
+  const [gastoEditar, setGastoEditar] = useState({});
+
+  useEffect(() => {
+    if (Object.keys(gastoEditar).length > 0) {
+      setModal(true)
+
+      setTimeout(() => {
+        setAnimarModal(true);
+      }, 500)
+    }
+  }, [gastoEditar])
+
   const handleNuevoGasto = () => {
     setModal(true)
+    setGastoEditar({});
 
     setTimeout(() => {
       setAnimarModal(true);
@@ -24,19 +37,35 @@ function App() {
   }
 
   const guardarGasto = gasto => {
-    gasto.id = generarId();
-    gasto.fecha = Date.now()
-    setGastos([...gastos, gasto])
-
+    if (gasto.id) {
+      //actualizar
+      //Si el Id de gast(Editar) es el mismo que el del gasto(del arrreglo) retorno el gasto sino el que estaba 
+      const gastosActualizados = gastos.map(gastoState => gastoState.id == gasto.id ? gasto : gastoState)
+      setGastos(gastosActualizados);
+      setGastoEditar({})
+    } else {
+      //Nuevo Gasto
+      gasto.id = generarId();
+      gasto.fecha = Date.now()
+      setGastos([...gastos, gasto])
+    }
     setAnimarModal(false)
     setTimeout(() => {
       setModal(false)
     }, 1000)
   }
 
+  const eliminarGasto = id => {
+    const gastosActualizados = gastos.filter(gastoState => gastoState.id != id);
+
+    setGastos(gastosActualizados);
+
+  }
+
   return (
-    <div className={modal? 'fijar': ''}>
+    <div className={modal ? 'fijar' : ''}>
       <Header
+        gastos={gastos}
         presupuesto={presupuesto}
         setPresupuesto={setPresupuesto}
         isValidPresupuesto={isValidPresupuesto}
@@ -45,9 +74,13 @@ function App() {
 
       {isValidPresupuesto &&
         <>
-        <main>
-          <ListadoGastos gastos={gastos}/>
-        </main>
+          <main>
+            <ListadoGastos
+              gastos={gastos}
+              setGastoEditar={setGastoEditar}
+              eliminarGasto={eliminarGasto}
+            />
+          </main>
           <div className='nuevo-gasto'>
             <img
               src={IconoNuevoGasto}
@@ -60,7 +93,14 @@ function App() {
 
       }
 
-      {modal && <Modal setModal={setModal} animarModal={animarModal} setAnimarModal={setAnimarModal} guardarGasto={guardarGasto} />}
+      {modal && <Modal
+        setModal={setModal}
+        animarModal={animarModal}
+        setAnimarModal={setAnimarModal}
+        guardarGasto={guardarGasto}
+        gastoEditar={gastoEditar}
+        setGastoEditar={setGastoEditar}
+      />}
     </div>
   )
 }

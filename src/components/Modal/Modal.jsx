@@ -1,36 +1,64 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Mensaje from '../Mensaje/Mensaje'
 import CerrarBtn from '../../img/cerrar.svg'
 
 
-const Modal = ({ setModal, animarModal, setAnimarModal, guardarGasto }) => {
+const Modal = ({
+    setModal,
+    animarModal,
+    setAnimarModal,
+    guardarGasto,
+    gastoEditar,
+    setGastoEditar
+}) => {
 
     const [mensaje, setMensaje] = useState('')
 
     const [nombre, setNombre] = useState('');
     const [cantidad, setCantidad] = useState('')
     const [categoria, setCategoria] = useState('')
+    const [fecha, setFecha] = useState('');
+    const [id, setId] = useState('');
+
+    useEffect(() => {
+        if (Object.keys(gastoEditar).length > 0) {
+            console.log('tiene algo');
+            setNombre(gastoEditar.nombre);
+            setCantidad(gastoEditar.cantidad);
+            setCategoria(gastoEditar.categoria);
+            setFecha(gastoEditar.fecha)
+            setId(gastoEditar.id);
+        }
+    }, [])
 
     const ocultarModal = () => {
         setAnimarModal(false)
+        setGastoEditar({})
         setTimeout(() => {
             setModal(false)
         }, 1000)
     }
 
-    const handleSubmint = (e) =>{
+    const handleSubmint = (e) => {
         e.preventDefault();
 
         if ([nombre, cantidad, categoria].includes('')) {
             setMensaje('Todos los campos son obligatorios')
 
-            setTimeout(()=>{
+            setTimeout(() => {
                 setMensaje('')
-            },2000)
+            }, 2000)
             return;
         }
 
-        guardarGasto({nombre,cantidad,categoria})
+        //Le paso el objeto a la funcion guardarGasto
+        guardarGasto({
+            nombre,
+            cantidad,
+            categoria,
+            fecha,
+            id
+        })
     }
 
     return (
@@ -44,7 +72,7 @@ const Modal = ({ setModal, animarModal, setAnimarModal, guardarGasto }) => {
             </div>
 
             <form onSubmit={handleSubmint} className={`formulario ${animarModal ? "animar" : "cerrar"}`}>
-                <legend>Nuevo gasto</legend>
+                <legend>{gastoEditar.nombre ? 'Editar Gasto' : 'Nuevo Gasto'}</legend>
 
                 {mensaje && <Mensaje tipo="error">{mensaje}</Mensaje>}
 
@@ -56,7 +84,7 @@ const Modal = ({ setModal, animarModal, setAnimarModal, guardarGasto }) => {
                         type="text"
                         placeholder='Añade el nombre'
                         value={nombre}
-                        onChange={e=> setNombre(e.target.value)}
+                        onChange={e => setNombre(e.target.value)}
                     />
                 </div>
 
@@ -68,7 +96,7 @@ const Modal = ({ setModal, animarModal, setAnimarModal, guardarGasto }) => {
                         type="number"
                         placeholder='Añade la cantidad del gasto: ej. 300'
                         value={cantidad}
-                        onChange={e => setCantidad(Number(e.target.value)) }
+                        onChange={e => setCantidad(Number(e.target.value))}
                     />
                 </div>
 
@@ -78,7 +106,7 @@ const Modal = ({ setModal, animarModal, setAnimarModal, guardarGasto }) => {
                     <select
                         id="categoria"
                         value={categoria}
-                        onChange={e=> setCategoria(e.target.value)}
+                        onChange={e => setCategoria(e.target.value)}
                     >
                         <option value="">-- Seleccione</option>
                         <option value="Ahorro">Ahorro</option>
@@ -93,7 +121,7 @@ const Modal = ({ setModal, animarModal, setAnimarModal, guardarGasto }) => {
 
                 <input
                     type="submit"
-                    value='Añadir Gasto'
+                    value={gastoEditar.nombre ? 'Guardar Cambios' : 'Añadir Gasto'}
                 />
             </form>
         </div>
